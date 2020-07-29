@@ -23,6 +23,7 @@ public class UserController {
     public @ResponseBody
     ResponseEntity<?> insertUser(@ModelAttribute User user) {
         userRepository.save(user);
+
         return ResponseEntity.ok("user successfully added");
     }
 
