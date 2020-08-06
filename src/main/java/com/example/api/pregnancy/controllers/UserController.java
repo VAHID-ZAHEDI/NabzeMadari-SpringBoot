@@ -19,12 +19,11 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
-    @PostMapping(value = "/User")
+    @PostMapping(value = "/addNewUser")
     public @ResponseBody
-    ResponseEntity<?> insertUser(@ModelAttribute User user) {
+    ResponseEntity<?> insertUser(@RequestBody User user) {
         userRepository.save(user);
-
-        return ResponseEntity.ok("user successfully added");
+        return ResponseEntity.ok("ثبت نام با موفقیت انجام شد.");
     }
 
     @PostMapping(value = "/getUser")
@@ -34,10 +33,10 @@ public class UserController {
         return user.isPresent() ? ResponseEntity.ok(user.get()) : ResponseEntity.badRequest().body(new ErrorModel("user not found"));
     }
 
-    @PostMapping(value = "/getAllUser")
+    @GetMapping(value = "/getAllUser")
     public @ResponseBody
-    List<User> getAllUser() {
+    ResponseEntity<?> getAllUser() {
         List<User> user = userRepository.findAll();
-        return user;
+        return ResponseEntity.ok(user);
     }
 }

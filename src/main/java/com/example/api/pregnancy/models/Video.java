@@ -3,7 +3,7 @@ package com.example.api.pregnancy.models;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Video {
+public class Video extends MyAuditModel {
     private int id;
     private String name;
 
