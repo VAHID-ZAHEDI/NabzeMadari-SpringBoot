@@ -12,5 +12,7 @@ import java.util.Optional;
 public interface UserRepository extends CrudRepository<User, String> {
     Optional<User> findAllByPhoneNumber(String phoneNumber);
 
+    Boolean existsByPhoneNumber(String phoneNumber);
+
     List<User> findAll();
 }

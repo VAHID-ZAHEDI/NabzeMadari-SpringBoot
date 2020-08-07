@@ -27,25 +27,8 @@ import java.util.Arrays;
 @SpringBootApplication(exclude = {org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration.class})
 @PropertySource("file:db.properties")
 @EnableMongoRepositories
-public class PregnancyApplication implements CommandLineRunner {
-    @Autowired
-    private UserRepository userRepository;
-
-    @Lazy
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
+public class PregnancyApplication {
     public static void main(String[] args) {
         SpringApplication.run(PregnancyApplication.class, args);
-    }
-
-
-    @Override
-    public void run(String... args) throws Exception {
-        if (this.userRepository.findAllByPhoneNumber("09396985633") == null) {
-            User user = new User("VAHID ZAHEDI", "09396985633", passwordEncoder.encode("rokin123"), Arrays.asList("ADMIN"));
-
-            this.userRepository.save(user);
-        }
     }
 }

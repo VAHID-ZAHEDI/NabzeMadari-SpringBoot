@@ -5,8 +5,11 @@ import com.example.api.pregnancy.models.User;
 import com.example.api.pregnancy.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,5 +41,11 @@ public class UserController {
     ResponseEntity<?> getAllUser() {
         List<User> user = userRepository.findAll();
         return ResponseEntity.ok(user);
+    }
+    @GetMapping("/user")
+    @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
+    public ResponseEntity<?> userAccess(Authentication authentication, Principal principal) {
+        Optional<User> userOptional = userRepository.findAllByPhoneNumber(principal.getName());
+        return ResponseEntity.ok(userOptional.get());
     }
 }
