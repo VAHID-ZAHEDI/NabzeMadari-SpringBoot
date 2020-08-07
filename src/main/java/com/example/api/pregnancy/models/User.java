@@ -34,14 +34,18 @@ public class User extends MyAuditModel {
     @JsonIgnore
     private String password;
     @DBRef
+    @JsonIgnore
     private Set<Role> roles = new HashSet<>();
+    @Size(max = 2)
+    private int age;
 
-    public User(@NotBlank String phoneNumber, String password, String firstName, String lastName, boolean isRegister) {
+    public User(@NotBlank String phoneNumber, String password, String firstName, String lastName, boolean isRegister,int age) {
         this.phoneNumber = phoneNumber;
         this.firstName = firstName;
         this.lastName = lastName;
         this.isRegister = isRegister;
         this.password = password;
+        this.age=age;
     }
 
     public User() {
@@ -101,5 +105,13 @@ public class User extends MyAuditModel {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
     }
 }

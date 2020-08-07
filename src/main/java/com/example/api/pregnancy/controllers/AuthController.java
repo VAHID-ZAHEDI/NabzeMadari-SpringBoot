@@ -77,7 +77,7 @@ public class AuthController {
 
         // Create new user's account without SMS verify code
         User user = new User(signUpRequest.getPhoneNumber(), encoder.encode("123456789"), signUpRequest.getFirstName()
-                , signUpRequest.getLastName(), true);
+                , signUpRequest.getLastName(), true,signUpRequest.getAge());
 
         Set<String> strRoles = signUpRequest.getRoles();
         Set<Role> roles = new HashSet<>();
