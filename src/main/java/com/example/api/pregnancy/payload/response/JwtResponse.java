@@ -1,52 +1,55 @@
 package com.example.api.pregnancy.payload.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
 
 public class JwtResponse {
-	private String token;
-	private String type = "Bearer";
-	private String id;
-//	private String username;
-	private String email;
-	private List<String> roles;
+    private String token;
+    private String type = "Bearer";
+    private String id;
+    //	private String username;
+//	private String email;
+    @JsonIgnore
+    private List<String> roles;
 
-	public JwtResponse(String accessToken, String id, List<String> roles) {
-		this.token = accessToken;
-		this.id = id;
-		this.roles = roles;
-	}
+    public JwtResponse(String accessToken, String id, List<String> roles) {
+        this.token = accessToken;
+        this.id = id;
+        this.roles = roles;
+    }
 
-	public String getAccessToken() {
-		return token;
-	}
+    public String getAccessToken() {
+        return token;
+    }
 
-	public void setAccessToken(String accessToken) {
-		this.token = accessToken;
-	}
+    public void setAccessToken(String accessToken) {
+        this.token = accessToken;
+    }
 
-	public String getTokenType() {
-		return type;
-	}
+    public String getTokenType() {
+        return type;
+    }
 
-	public void setTokenType(String tokenType) {
-		this.type = tokenType;
-	}
+    public void setTokenType(String tokenType) {
+        this.type = tokenType;
+    }
 
-	public String getId() {
-		return id;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
+//	public String getEmail() {
+//		return email;
+//	}
+//
+//	public void setEmail(String email) {
+//		this.email = email;
+//	}
 
 //	public String getUsername() {
 //		return username;
@@ -56,7 +59,7 @@ public class JwtResponse {
 //		this.username = username;
 //	}
 
-	public List<String> getRoles() {
-		return roles;
-	}
+    public List<String> getRoles() {
+        return roles;
+    }
 }
