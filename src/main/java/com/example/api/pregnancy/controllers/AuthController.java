@@ -30,9 +30,11 @@ import org.springframework.social.connect.web.SessionStrategy;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -60,55 +62,60 @@ public class AuthController {
     @Autowired
     public OtpService otpService;
 
+
     @PostMapping("/generateOtp")
     public @ResponseBody
     ResponseEntity<?> generateOtp(String phoneNumber) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
         int otp = otpService.generateOTP(phoneNumber);
+        SmsCode smsCode = new SmsCode(String.valueOf(otp), 60);
+        System.out.println(phoneNumber);
+        System.out.println("code is  :" + smsCode.getCode());
+        System.out.println("phone is  :" + phoneNumber);
 //Generate The Template to send OTP
 
-        return ResponseEntity.ok("code: " + otp + " username :" + phoneNumber);
+        return ResponseEntity.ok(smsCode);
     }
 
     @PostMapping(value = "/validateOtp")
     public @ResponseBody
-    String validateOtp(String phoneNumber,int otpnum) {
+    ResponseEntity<?> validateOtp(String phoneNumber, int otpnum, String expireTime) {
         final String SUCCESS = "Entered Otp is valid";
         final String FAIL = "Entered Otp is NOT valid. Please Retry!";
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+//        LocalDateTime dateTime = LocalDateTime.parse(expireTime, formatter);
+
+//        SmsCode smsCode = new SmsCode(String.valueOf(otpnum), dateTime);
 //Validate the Otp
+
         if (otpnum >= 0) {
             int serverOtp = otpService.getOtp(phoneNumber);
             System.out.println("serverOTP : " + serverOtp);
             System.out.println("user otp : " + otpnum);
             if (serverOtp > 0) {
                 if (otpnum == serverOtp) {
-                    otpService.clearOTP(username);
-                    return SUCCESS;
+                    otpService.clearOTP(phoneNumber);
+                    System.out.println("user exists :" + userRepository.existsByPhoneNumber(phoneNumber));
+                    if (userRepository.existsByPhoneNumber(phoneNumber)) {
+                        Optional<User> oUser = userRepository.findByPhoneNumber(phoneNumber);
+                        oUser.get().setRegister(true);
+                        return ResponseEntity.ok((JwtResponse) authenticateUser(phoneNumber).getBody());
+                    } else {
+                        return ResponseEntity.ok(new User());
+                    }
                 } else {
-                    return FAIL;
+                    return ResponseEntity.badRequest().body("");
                 }
             } else {
-                return FAIL;
+                return ResponseEntity.badRequest().body("");
             }
         } else {
-            return FAIL;
+            return ResponseEntity.badRequest().body("");
         }
     }
+
+
 //************************************************************************
 
-
-    @GetMapping("/sms")
-    public @ResponseBody
-    ResponseEntity<?> generateSmsCode(HttpServletRequest request, HttpServletResponse response, String mobile) throws IOException {
-        SmsCode smsCode = createSMSCode();
-        sessionStrategy.setAttribute(new ServletWebRequest(request), SESSION_KEY_SMS_CODE + mobile, smsCode);
-        // Output verification code to console instead of SMS sending service
-        System.out.println("Your login verification code is:" + smsCode.getCode() + "，Valid for 60 seconds");
-        return ResponseEntity.ok(smsCode);
-    }
 
     private SmsCode createSMSCode() {
         //Introducing commons Lang package
@@ -118,10 +125,10 @@ public class AuthController {
 
     //////////////////////////////////////
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @ModelAttribute LoginRequest loginRequest) {
+    public ResponseEntity<?> authenticateUser(@Valid @NotBlank String phoneNumber) {
 
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getPhoneNumber(), "123456789"));
+                new UsernamePasswordAuthenticationToken(phoneNumber, "123456789"));
 //        AuthorityUtils.createAuthorityList("ROLE_USER");
         SecurityContextHolder.getContext().setAuthentication(authentication);
 

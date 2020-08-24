@@ -32,7 +32,7 @@ public class UserController {
     @PostMapping(value = "/getUser")
     public @ResponseBody
     ResponseEntity<?> getUser(String phoneNumber) {
-        Optional<User> user = userRepository.findAllByPhoneNumber(phoneNumber);
+        Optional<User> user = userRepository.findByPhoneNumber(phoneNumber);
         return user.isPresent() ? ResponseEntity.ok(user.get()) : ResponseEntity.badRequest().body(new ErrorModel("user not found"));
     }
 
@@ -45,7 +45,7 @@ public class UserController {
     @GetMapping("/user")
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     public ResponseEntity<?> userAccess(Authentication authentication, Principal principal) {
-        Optional<User> userOptional = userRepository.findAllByPhoneNumber(principal.getName());
+        Optional<User> userOptional = userRepository.findByPhoneNumber(principal.getName());
         return ResponseEntity.ok(userOptional.get());
     }
 }
