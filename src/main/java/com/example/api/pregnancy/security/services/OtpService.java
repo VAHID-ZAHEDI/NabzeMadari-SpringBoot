@@ -30,8 +30,6 @@ public class OtpService {
         });
     }
 
-    //This method is used to push the opt number against Key. Rewrite the OTP if it exists
-    //Using user id  as key
     public int generateOTP(String key) {
 
         Random random = new Random();
@@ -48,6 +46,7 @@ public class OtpService {
             return 0;
         }
     }
+
 
     //This method is used to clear the OTP catched already
     public void clearOTP(String key) {

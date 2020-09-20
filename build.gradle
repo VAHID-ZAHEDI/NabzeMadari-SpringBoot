@@ -28,6 +28,7 @@ dependencies {
     implementation group: 'com.google.guava', name: 'guava', version: '21.0'
 //    implementation 'dev.samstevens.totp:totp:1.7'
     implementation group: 'org.springframework.social', name: 'spring-social-web', version: '1.1.2.RELEASE'
+    compileOnly "org.springframework.boot:spring-boot-configuration-processor"
 
 
 //    implementation( group: 'org.hibernate', name: 'hibernate-gradle-plugin', version: '5.4.8.Final')

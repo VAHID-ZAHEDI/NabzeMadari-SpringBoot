@@ -1,11 +1,7 @@
 package com.example.api.pregnancy.controllers;
 
 
-import com.example.api.pregnancy.models.ERole;
-import com.example.api.pregnancy.models.Role;
-import com.example.api.pregnancy.models.SmsCode;
-import com.example.api.pregnancy.models.User;
-import com.example.api.pregnancy.payload.request.LoginRequest;
+import com.example.api.pregnancy.models.*;
 import com.example.api.pregnancy.payload.request.SignupRequest;
 import com.example.api.pregnancy.payload.response.JwtResponse;
 import com.example.api.pregnancy.payload.response.MessageResponse;
@@ -14,7 +10,6 @@ import com.example.api.pregnancy.repositories.UserRepository;
 import com.example.api.pregnancy.security.jwt.JwtUtils;
 import com.example.api.pregnancy.security.services.OtpService;
 import com.example.api.pregnancy.security.services.UserDetailsImpl;
-import com.example.api.pregnancy.utilities.Generator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,15 +18,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.social.connect.web.HttpSessionSessionStrategy;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.social.connect.web.SessionStrategy;
+import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -67,61 +58,47 @@ public class AuthController {
     public @ResponseBody
     ResponseEntity<?> generateOtp(String phoneNumber) {
         int otp = otpService.generateOTP(phoneNumber);
-        SmsCode smsCode = new SmsCode(String.valueOf(otp), 60);
+        SmsCode smsCode = new SmsCode(phoneNumber, String.valueOf(otp), 10);
         System.out.println(phoneNumber);
         System.out.println("code is  :" + smsCode.getCode());
         System.out.println("phone is  :" + phoneNumber);
 //Generate The Template to send OTP
-
         return ResponseEntity.ok(smsCode);
     }
 
     @PostMapping(value = "/validateOtp")
     public @ResponseBody
-    ResponseEntity<?> validateOtp(String phoneNumber, int otpnum, String expireTime) {
-        final String SUCCESS = "Entered Otp is valid";
-        final String FAIL = "Entered Otp is NOT valid. Please Retry!";
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-//        LocalDateTime dateTime = LocalDateTime.parse(expireTime, formatter);
-
-//        SmsCode smsCode = new SmsCode(String.valueOf(otpnum), dateTime);
-//Validate the Otp
-
-        if (otpnum >= 0) {
+    ResponseEntity<?> validateOtp(String phoneNumber, int otp) {
+        if (otp >= 0) {
             int serverOtp = otpService.getOtp(phoneNumber);
             System.out.println("serverOTP : " + serverOtp);
-            System.out.println("user otp : " + otpnum);
+            System.out.println("user otp : " + otp);
             if (serverOtp > 0) {
-                if (otpnum == serverOtp) {
+                if (otp == serverOtp) {
                     otpService.clearOTP(phoneNumber);
                     System.out.println("user exists :" + userRepository.existsByPhoneNumber(phoneNumber));
                     if (userRepository.existsByPhoneNumber(phoneNumber)) {
                         Optional<User> oUser = userRepository.findByPhoneNumber(phoneNumber);
                         oUser.get().setRegister(true);
-                        return ResponseEntity.ok((JwtResponse) authenticateUser(phoneNumber).getBody());
+//                        return ResponseEntity.ok((JwtResponse) authenticateUser(phoneNumber).getBody());
+                        return ResponseEntity.ok(oUser.get());
                     } else {
                         return ResponseEntity.ok(new User());
                     }
                 } else {
-                    return ResponseEntity.badRequest().body("");
+                    return ResponseEntity.badRequest().body(new ErrorModel("کد ارسالی صحیح نمی باشد.", 450));
                 }
             } else {
-                return ResponseEntity.badRequest().body("");
+                return ResponseEntity.badRequest().body(new ErrorModel("کد ارسالی منقضی شده است لطفا مجدد کد را دریافت کنید!", 451));
             }
         } else {
-            return ResponseEntity.badRequest().body("");
+            return ResponseEntity.badRequest().body(new ErrorModel("کد ارسالی صحیح نمی باشد.", 450));
         }
     }
 
 
 //************************************************************************
 
-
-    private SmsCode createSMSCode() {
-        //Introducing commons Lang package
-        String code = String.valueOf(Generator.createSMSCode().getCode());
-        return new SmsCode(code, 60);
-    }
 
     //////////////////////////////////////
     @PostMapping("/signin")
@@ -146,6 +123,8 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        System.out.println("phhhh : " + signUpRequest.getPhoneNumber());
+
         if (userRepository.existsByPhoneNumber(signUpRequest.getPhoneNumber())) {
             return ResponseEntity
                     .badRequest()
@@ -188,7 +167,7 @@ public class AuthController {
 
         user.setRoles(roles);
         userRepository.save(user);
-
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        Optional<User> user1 = userRepository.findByPhoneNumber(signUpRequest.getPhoneNumber());
+        return ResponseEntity.ok(user1.get());
     }
 }

@@ -4,10 +4,12 @@ import java.time.LocalDateTime;
 
 public class SmsCode {
     private String code;
+    private String phoneNumber;
     private LocalDateTime expireTime;
 
-    public SmsCode(String code, int expireIn) {
+    public SmsCode(String phoneNumber,String code, int expireIn) {
         this.code = code;
+        this.phoneNumber=phoneNumber;
         this.expireTime = LocalDateTime.now().plusSeconds(expireIn);
     }
 
@@ -34,5 +36,13 @@ public class SmsCode {
 
     public void setExpireTime(LocalDateTime expireTime) {
         this.expireTime = expireTime;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }
